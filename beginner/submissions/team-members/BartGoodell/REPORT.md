@@ -108,6 +108,7 @@ A: After removing the duplicate rows, our cleaned dataset, stored in the DataFra
 
 Shape: The shape of the DataFrame is (229474, 22).
 Rows: This means the dataset contains 229,474 rows (which represent individual observations or patients after removing duplicates).
+
 Columns: It has 22 columns (which represent the features and the target variable). 
 
 ---
@@ -117,13 +118,31 @@ Columns: It has 22 columns (which represent the features and the target variable
 
 Q: Identify the binary (`0` or `1`) categorical features and apply a simple mapping or encoder. Which features did you encode?  
 A:  
+    Diabetes_binary   Target   Binary             None   
+2                 HighBP  Feature   Binary             None   
+3               HighChol  Feature   Binary             None   
+4              CholCheck  Feature   Binary             None   
+6                 Smoker  Feature   Binary             None   
+7                 Stroke  Feature   Binary             None   
+8   HeartDiseaseorAttack  Feature   Binary             None   
+9           PhysActivity  Feature   Binary             None   
+10                Fruits  Feature   Binary             None   
+11               Veggies  Feature   Binary             None   
+12     HvyAlcoholConsump  Feature   Binary             None   
+13         AnyHealthcare  Feature   Binary             None   
+14           NoDocbcCost  Feature   Binary             None   
+18              DiffWalk  Feature   Binary             None   
+19                   Sex  Feature   Binary              Sex 
 
-Q: The `GenHealth` and `Education` features are ordinal. Apply a custom mapping that preserves their inherent order and justify the order you chose.  
-A:  
+
+Q: The `GenHealth` and `Education` features are ordinal. Apply a custom mapping that preserves their inherent order and justify the order you chose. 
+
+A: The dataset description for 'GenHlth' indicates that the integer values represent a subjective assessment of general health, where 1 is Excellent, 2 is Very Good, 3 is Good, 4 is Fair, and 5 is Poor. The chosen mapping preserves this inherent ordinal structure, assigning a numerical value to each level that reflects its position on a scale from best health (1) to worst health (5).
+
+The dataset description for 'Education' indicates that the integer values represent increasing levels of education, from no schooling (1) to college graduate (6). The chosen mapping preserves this inherent ordinal structure, assigning a numerical value to each level that reflects its position in the hierarchy of educational attainment
 
 Q: For any remaining nominal categorical features, apply one-hot encoding. Why is this method more suitable for nominal data than a simple integer label?  
-A:  
-
+A:  No nominal features were identified in the dataset at the stage where one-hot encoding was considered, so no features were one-hot encoded.
 ---
 
 ### ✨ 2. Feature Creation
@@ -304,8 +323,6 @@ Shape of preprocessed testing features (X_test_scaled): (91258, 25)
 
 ## ✅ Week 3: Model Development & Experimentation
 
----
-
 ### 🤖 1. Baseline Model Training
 
 Q: Which baseline models did you choose for this classification task, and why?  
@@ -335,7 +352,7 @@ Address: I addressed this by carefully re-generating the one-hot encoded test se
 These preprocessing steps were crucial to ensure that the data was in a suitable format for the classification models and to prevent errors during training and prediction. The errors encountered highlighted the importance of carefully handling categorical features, addressing class imbalance, and correctly applying scaling while avoiding data leakage and NaN values. 
 
 ---
-
+  
 ### 📈 2. Experiment Tracking
 
 Q: How did you use MLflow (or another tool) to track your experiments?  
