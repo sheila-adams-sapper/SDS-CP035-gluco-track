@@ -103,7 +103,7 @@ A: - BMI, MentHlth, PhysHlth will be scaled to handle outliers and normalize the
 - Features with near-constant values or low variance features such as CholCheck, Stroke and AnyHealthcare, may be excluded to reduce noise and improve model efficiency
 
 Q: What does your cleaned dataset look like (rows, columns, shape)?  
-A:  After removing duplicate entries, the cleaned dataset will contains 229,474 rows and 22 columns, resulting in a shape of (229474, 22).
+A:  After removing duplicate entries, the cleaned dataset will contain 229,474 rows and 22 columns, resulting in a shape of (229474, 22).
 
 
 ## ✅ Week 2: Feature Engineering & Preprocessing

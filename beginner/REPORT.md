@@ -119,3 +119,129 @@ A:
 
 Q: Display the shape of your final, preprocessed training features (`X_train_processed`) and testing features (`X_test_processed`).  
 A:
+
+---
+
+## ✅ Week 3: Model Development & Experimentation
+
+---
+
+### 🤖 1. Baseline Model Training
+
+Q: Which baseline models did you choose for this classification task, and why?  
+A:  
+
+Q: How did you implement and evaluate Logistic Regression, Decision Tree, and Naive Bayes models?  
+A:  
+
+Q: What challenges did you encounter during model training, and how did you address them?  
+A:  
+
+---
+
+### 📈 2. Experiment Tracking
+
+Q: How did you use MLflow (or another tool) to track your experiments?  
+A:  
+
+Q: What key parameters and metrics did you log for each model run?  
+A:  
+
+Q: How did experiment tracking help you compare and select the best model?  
+A:  
+
+---
+
+### 🧮 3. Model Evaluation
+
+Q: Which evaluation metrics did you use to assess model performance, and why are they appropriate for this problem?  
+A:  
+
+Q: How did you interpret the accuracy, precision, recall, and F1-score for your models?  
+A:  
+
+Q: Did you observe any trade-offs between different metrics? How did you decide which metric(s) to prioritize?  
+A:  
+
+---
+
+### 🕵️ 4. Error Analysis
+
+Q: How did you use confusion matrices to analyze model errors?  
+A:  
+
+Q: What types of misclassifications were most common, and what might explain them?  
+A:  
+
+Q: How did your error analysis inform your next steps in model improvement?  
+A:  
+
+---
+
+### 📝 5. Model Selection & Insights
+
+Q: Based on your experiments, which model performed best and why?  
+A:  
+
+Q: What are your top 3–5 insights from model development and experimentation?  
+A:  
+
+Q: How would you communicate your model’s strengths and limitations to a non-technical stakeholder?  
+A:  
+
+---
+
+## ✅ Week 4: Model Tuning & Finalization
+
+---
+
+### 🛠️ 1. Hyperparameter Tuning
+
+Q: Which hyperparameters did you tune for your models, and what methods (e.g., grid search, random search) did you use?  
+A:  
+
+Q: How did you select the range or values for each hyperparameter?  
+A:  
+
+Q: What impact did hyperparameter tuning have on your model’s performance?  
+A:  
+
+---
+
+### 🔄 2. Cross-Validation
+
+Q: How did you use cross-validation to assess model stability and generalization?  
+A:  
+
+Q: What were the results of your cross-validation, and did you observe any variance across folds?  
+A:  
+
+Q: Why is cross-validation important in this context?  
+A:  
+
+---
+
+### 🏆 3. Final Model Selection
+
+Q: How did you choose your final model after tuning and validation?  
+A:  
+
+Q: Did you retrain your final model on the full training set before evaluating on the test set? Why or why not?  
+A:  
+
+Q: What were the final test set results, and how do they compare to your validation results?  
+A:  
+
+---
+
+### 📊 4. Feature Importance & Interpretation
+
+Q: How did you assess feature importance for your final model?  
+A:  
+
+Q: Which features were most influential in predicting diabetes risk, and do these results align with domain knowledge?  
+A:  
+
+Q: How would you explain your model’s decision process to a non-technical audience?  
+A:
+

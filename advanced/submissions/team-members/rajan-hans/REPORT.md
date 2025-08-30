@@ -79,3 +79,120 @@
 **Q: What does your cleaned dataset look like (rows, columns, shape)?**  
 **A:** Notebook reports **(253,680 rows × 24 columns)** with 0 missing and 0 duplicates. For modeling, we will **drop `ID`**, yielding **23 features + 1 target** (24 columns total during training artifacts).
 
+
+
+## ✅ Week 2: Feature Engineering & Deep Learning Prep
+
+---
+
+### 🏷️ 1. Categorical Feature Encoding
+
+**Q: Which categorical features in the dataset have more than two unique values?**
+**A:**  As we have seen these are the High-cardinality categorical features (more than 2 unique values): ['GenHlth', 'Age', 'Education', 'Income']
+
+**Q: Apply integer-encoding to these high-cardinality features. Why is this strategy suitable for a subsequent neural network with an embedding layer?**
+**A:**  The high-cardinality features are already integer-encoded as below:
+| Feature   |   Value | Meaning                                              |
+|:----------|--------:|:-----------------------------------------------------|
+| GenHlth   |       1 | Excellent                                            |
+| GenHlth   |       2 | Very Good                                            |
+| GenHlth   |       3 | Good                                                 |
+| GenHlth   |       4 | Fair                                                 |
+| GenHlth   |       5 | Poor                                                 |
+| Age       |       1 | 18-24                                                |
+| Age       |       2 | 25-29                                                |
+| Age       |       3 | 30-34                                                |
+| Age       |       4 | 35-39                                                |
+| Age       |       5 | 40-44                                                |
+| Age       |       6 | 45-49                                                |
+| Age       |       7 | 50-54                                                |
+| Age       |       8 | 55-59                                                |
+| Age       |       9 | 60-64                                                |
+| Age       |      10 | 65-69                                                |
+| Age       |      11 | 70-74                                                |
+| Age       |      12 | 75-79                                                |
+| Age       |      13 | 80 or older                                          |
+| Education |       1 | Never attended school or only kindergarten           |
+| Education |       2 | Grades 1-8 (Elementary)                              |
+| Education |       3 | Grades 9-11 (Some high school)                       |
+| Education |       4 | Grade 12 or GED (High school graduate)               |
+| Education |       5 | College 1-3 years (Some college or technical school) |
+| Education |       6 | College 4 years or more (College graduate)           |
+| Income    |       1 | Less than $10,000                                    |
+| Income    |       2 | $10,000 to less than $15,000                         |
+| Income    |       3 | $15,000 to less than $20,000                         |
+| Income    |       4 | $20,000 to less than $25,000                         |
+| Income    |       5 | $25,000 to less than $35,000                         |
+| Income    |       6 | $35,000 to less than $50,000                         |
+| Income    |       7 | $50,000 to less than $75,000                         |
+| Income    |       8 | $75,000 or more                                      |
+|:----------|--------:|:-----------------------------------------------------
+**Q: Display the first 5 rows of the transformed data to show the new integer labels.**  
+**A:**  First 5 rows of transformed data with integer labels:
+   bmi_category_encoded  Age_encoded  GenHlth_encoded
+0  5                     8            4              
+1  2                     6            2              
+2  2                     8            4              
+3  2                     10           1              
+4  1                     10           1              
+
+---
+
+### ⚖️ 2. Numerical Feature Scaling
+
+**Q: Which numerical features did your EDA from Week 1 suggest would benefit from scaling?**  
+A:  Based on Week 1 EDA findings: MentHlth and PhysHlth show right-skewed distributions and would benefit from scaling
+
+**Q: Apply a scaling technique to these features. Justify your choice of `StandardScaler` vs. `MinMaxScaler` or another method.**  
+A:  StandardScaler was used instead of MinMaxScaler because it standardizes features by removing the mean and scaling to unit variance (mean = 0, std = 1). This is ideal for features like MentHlth and PhysHlth that have right-skewed distributions and may not be naturally bounded. Standardization helps many machine learning algorithms (especially those that assume Gaussian-like distributions or are sensitive to feature scale, such as neural networks and linear models) to converge faster and perform better.
+
+MinMaxScaler rescales features to a fixed range (usually 0 to 1), which is useful when you want all features strictly within a bounded interval, but it can be sensitive to outliers and does not center the data. In this notebook, the goal was to normalize the distribution and variance of the selected features, making StandardScaler the more appropriate choice.
+
+**Q: Show the summary statistics of the scaled data to confirm the transformation was successful.**
+A:  Summary statistics after scaling:
+           MentHlth      PhysHlth
+count  2.294740e+05  2.294740e+05
+mean  -2.675287e-17  2.972542e-17
+std    1.000002e+00  1.000002e+00
+min   -4.547857e-01 -5.172127e-01
+25%   -4.547857e-01 -5.172127e-01
+50%   -4.547857e-01 -5.172127e-01
+75%   -1.956387e-01 -7.526566e-02
+max    3.432420e+00  2.797390e+00
+
+
+### ✂️ 3. Stratified Data Splitting
+
+**Q: Split the data into training, validation, and testing sets (e.g., 70/15/15). What function and parameters did you use?**
+A:  The function used is train_test_split from scikit-learn. It is used to split arrays or dataframes into random train and test subsets. In your code, it is used to:
+
+Split the feature set (X) and target (y) into two parts: a test set (15% of the data) and a temporary set (85% of the data).
+The stratify=y argument ensures that the class distribution (e.g., proportion of diabetes cases) is preserved in both splits.
+The random_state=42 argument ensures reproducibility of the split.
+This function is essential for creating unbiased training, validation, and test sets for machine learning, especially when dealing with imbalanced classes. It helps evaluate model performance on unseen data and prevents overfitting.
+
+**Q: Why is it critical to use stratification for this specific dataset?**
+A:  Stratification ensures that the class distribution (e.g., proportion of diabetes cases) is preserved in both splits.
+
+**Q: Verify the stratification by showing the class distribution of `Diabetes_binary` in each of the three resulting sets.**
+A:  Stratification was successful. The plots show class balance is maintained across all splits
+
+---
+
+### 📦 4. Deep Learning Dataset Preparation
+
+**Q: Convert your three data splits into PyTorch `DataLoader` or TensorFlow `tf.data.Dataset` objects. What batch size did you choose and why?**
+A:  Converted the three data splits - Traon, Val and Test into pytorch dataloaders
+Batch size was kept as 64
+A batch size of 64 is commonly used because it offers a good balance between training speed and model performance. Larger batch sizes (like 64) allow for more efficient computation on modern hardware (especially GPUs), as more data is processed in parallel, which can speed up training. It also helps stabilize gradient estimates, making optimization smoother.
+
+A batch size of 32 is also popular and may sometimes lead to slightly better generalization, but it processes fewer samples per step, which can make training slower. The choice between 32 and 64 is not strict—both are reasonable defaults. In practice, the best batch size depends on your dataset size, available memory, and hardware. For this notebook, 64 was chosen as a typical value for deep learning tasks, but you can experiment with 32 or other values to see what works best for your setup.
+
+**Q: To confirm they are set up correctly, retrieve one batch from your training loader. What is the shape of the features (X) and labels (y) in this batch?**
+A:  The features (X) in one batch have shape [64, 22].
+The labels (y) in one batch have shape [64, 1].
+
+**Q: Explain the role of the `shuffle` parameter in your training loader. Why is this setting important for the training set but not for the validation or testing sets?**
+A:The shuffle parameter in your training DataLoader randomizes the order of samples in each epoch. This is important for the training set because it prevents the model from learning patterns based on the order of the data, improves generalization, and helps avoid overfitting. Shuffling ensures that each batch contains a diverse mix of samples, which leads to more stable and effective gradient updates.
+
+For validation and testing sets, shuffling is not needed because you want to evaluate the model on a fixed, consistent set of data. Keeping the order unchanged ensures reproducible and reliable performance metrics.
