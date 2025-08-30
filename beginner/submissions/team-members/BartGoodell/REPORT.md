@@ -108,8 +108,76 @@ A: After removing the duplicate rows, our cleaned dataset, stored in the DataFra
 
 Shape: The shape of the DataFrame is (229474, 22).
 Rows: This means the dataset contains 229,474 rows (which represent individual observations or patients after removing duplicates).
+
 Columns: It has 22 columns (which represent the features and the target variable). 
 
+---
+## ✅ Week 2: Feature Engineering & Preprocessing
+
+### 🏷️ 1. Feature Encoding
+
+Q: Identify the binary (`0` or `1`) categorical features and apply a simple mapping or encoder. Which features did you encode?  
+A:  
+    Diabetes_binary   Target   Binary             None   
+2                 HighBP  Feature   Binary             None   
+3               HighChol  Feature   Binary             None   
+4              CholCheck  Feature   Binary             None   
+6                 Smoker  Feature   Binary             None   
+7                 Stroke  Feature   Binary             None   
+8   HeartDiseaseorAttack  Feature   Binary             None   
+9           PhysActivity  Feature   Binary             None   
+10                Fruits  Feature   Binary             None   
+11               Veggies  Feature   Binary             None   
+12     HvyAlcoholConsump  Feature   Binary             None   
+13         AnyHealthcare  Feature   Binary             None   
+14           NoDocbcCost  Feature   Binary             None   
+18              DiffWalk  Feature   Binary             None   
+19                   Sex  Feature   Binary              Sex 
+
+
+Q: The `GenHealth` and `Education` features are ordinal. Apply a custom mapping that preserves their inherent order and justify the order you chose. 
+
+A: The dataset description for 'GenHlth' indicates that the integer values represent a subjective assessment of general health, where 1 is Excellent, 2 is Very Good, 3 is Good, 4 is Fair, and 5 is Poor. The chosen mapping preserves this inherent ordinal structure, assigning a numerical value to each level that reflects its position on a scale from best health (1) to worst health (5).
+
+The dataset description for 'Education' indicates that the integer values represent increasing levels of education, from no schooling (1) to college graduate (6). The chosen mapping preserves this inherent ordinal structure, assigning a numerical value to each level that reflects its position in the hierarchy of educational attainment
+
+Q: For any remaining nominal categorical features, apply one-hot encoding. Why is this method more suitable for nominal data than a simple integer label?  
+A:  No nominal features were identified in the dataset at the stage where one-hot encoding was considered, so no features were one-hot encoded.
+---
+
+### ✨ 2. Feature Creation
+
+Q: Create a new feature for BMI categories (e.g., Underweight, Normal, Overweight, Obese) from the `BMI` column. Display the value counts for your new categories.  
+A:  
+
+Q: Create a new feature named `TotalHealthDays` by combining `PhysHlth` and `MentHlth`. What is the rationale behind creating this feature?  
+A:  
+
+---
+
+### ✂️ 3. Data Splitting
+
+Q: Split your dataset into training and testing sets (an 80/20 split is recommended). Use stratification on the `Diabetes_binary` target variable.  
+A:  
+
+Q: Why is it critical to split the data *before* applying techniques like SMOTE or scaling?  
+A:  
+
+Q: Show the shape of your `X_train`, `X_test`, `y_train`, and `y_test` arrays to confirm the split.  
+A:  
+
+---
+
+### ⚖️ 4. Imbalance Handling & Final Preprocessing
+
+Q: Apply the SMOTE technique to address class imbalance. Importantly, apply it *only* to the training data. Show the class distribution of the training target variable before and after.  
+A:  
+
+Q: Normalize the numerical features using `StandardScaler`. Fit the scaler *only* on the training data, then transform both the training and testing data. Why must you not fit the scaler on the test data?  
+A:  
+
+Q: Display the shape of your final, preprocessed training features (`X_train_processed`) and testing features (`X_test_processed`).  
+A:
 
 ---
 ## ✅ Week 2: Feature Engineering & Preprocessing
@@ -255,8 +323,6 @@ Shape of preprocessed testing features (X_test_scaled): (91258, 25)
 
 ## ✅ Week 3: Model Development & Experimentation
 
----
-
 ### 🤖 1. Baseline Model Training
 
 Q: Which baseline models did you choose for this classification task, and why?  
@@ -276,6 +342,7 @@ Logistic Regression    0.666489	    0.258790	0.747630	0.384489	0.700492
 
 
 Q: What challenges did you encounter during model training, and how did you address them?  
+
 A: Here are the key challenges and how they were addressed:
 
 Non-numerical Data for SMOTE: The SMOTE technique requires numerical input features. Initially, when I attempted to apply SMOTE to X_train, I encountered a ValueError because the BMI_category column contained string values ('Underweight', 'Normal', etc.).
@@ -286,56 +353,113 @@ Address: I addressed this by carefully re-generating the one-hot encoded test se
 These preprocessing steps were crucial to ensure that the data was in a suitable format for the classification models and to prevent errors during training and prediction. The errors encountered highlighted the importance of carefully handling categorical features, addressing class imbalance, and correctly applying scaling while avoiding data leakage and NaN values. 
 
 ---
-
+  
 ### 📈 2. Experiment Tracking
 
-Q: How did you use MLflow (or another tool) to track your experiments?  
-A:  
+Q: How did you use MLflow (or another tool) to track your experiments?   
+A: I used MLFlow, chose  the algorithms and then hit enter. The algorithm then did the the analysis and logged into 
+a file MLFlow on my laptop. Below I will enter the results.
+
 
 Q: What key parameters and metrics did you log for each model run?  
 A:  
+ index	           Accuracy  Precision	 Recall	 F1-score   AUC
+Naive Bayes  	    0.644 	  0.256	      0.813	  0.389	   0.715
+Decision Tree	    0.750	  0.254	      0.412	  0.314	   0.608
+Logistic Regression	0.727	  0.297	      0.701	  0.417	   0.716
+Random Forest	    0.780	  0.308       0.466	  0.371	   0.648
+Gradient Boosting	0.720	  0.295	      0.730   0.420	   0.724
+k-Nearest Neighbors	0.720	  0.268	      0.583   0.367	   0.663
+Summary:
+Comparing all six models:
+- Random Forest performs best in terms of Accuracy (0.7800).
+- Random Forest performs best in terms of Precision (0.3083), which is important for minimizing false positives.
+- Naive Bayes performs best in terms of Recall (0.8127), which is crucial for minimizing false negatives in diabetes prediction.
+- Gradient Boosting achieves the highest F1-score (0.4203), indicating the best balance between precision and recall.
+- Gradient Boosting has the highest AUC (0.7238), showing the best overall ability to distinguish between classes.
+
+Performance of new models compared to initial models:
+Random Forest shows good overall performance, particularly in Accuracy and Precision, and is competitive with Logistic Regression. However, its Recall is lower than Naive Bayes and Gradient Boosting.
+Gradient Boosting demonstrates strong Recall, second only to Naive Bayes, and has a competitive F1-score and AUC. It appears to be a good model for identifying positive cases.
+k-Nearest Neighbors generally performs less well across most metrics compared to the ensemble methods (Random Forest and Gradient Boosting) and Logistic Regression, although it has a higher Recall than Decision Tree and Random Forest.
+Overall, considering the importance of Recall in this medical context, Naive Bayes and Gradient Boosting show strengths in identifying diabetes cases. Logistic Regression and Random Forest offer a better balance of precision and accuracy.
+Distributions.
 
 Q: How did experiment tracking help you compare and select the best model?  
-A:  
-
----
-
-### 🧮 3. Model Evaluation
+A: Centralized recording of the mlruns where details are logged in one file and can be compared easily side by side. Note above table. Easy comparison of metrics from run to run. Understanding of parameters and see how different parameters affect the model performances from run to run and this will help to find the optimal settings. Also, reproducibility from run to run and the ability to find specific tuning parameters to adjust or reevaluate if necessary. 
 
 Q: Which evaluation metrics did you use to assess model performance, and why are they appropriate for this problem?  
-A:  
+A: I used 6 metrics: Accuracy, useful but in this case, because of class imbalance, the algorithm can simply assign "no Diabetes" and be correct +85% of the time. This is useless because, given the features, we want to be able to predict the Diabetes instances with a high degree of certainty. And even overestimate "False Positives" which can be checked easily with inexpensive tests to confirm diagnosis. False negatives on the other hand WILL lead to health issues in the near term if not addressed. 
+
+Precision: The proportion of correctly predicted positive instances (true positives) out of all instances predicted as positive (true positives + false positives). It measures the model's ability to avoid false positives.
+Why it's appropriate: In the context of diabetes prediction, a false positive would mean predicting that someone has diabetes when they actually don't. High precision is important to minimize unnecessary follow-up tests, anxiety, and costs associated with false diagnoses.
+
+Recall (Sensitivity): The proportion of correctly predicted positive instances (true positives) out of all actual positive instances (true positives + false negatives). It measures the model's ability to find all the positive instances. High recall is essential to minimize false negatives and ensure that as many actual diabetes cases as possible are identified.
+
+F1-score: The harmonic mean of Precision and Recall. It provides a single score that balances both precision and recall. The F1-score is particularly useful when dealing with imbalanced datasets. It gives a better measure of the model's performance than accuracy alone because it considers both false positives and false negatives, providing a balanced evaluation of the model's ability to classify the positive class.
+
+AUC (Area Under the Receiver Operating Characteristic Curve): A measure of the model's ability to distinguish between the positive and negative classes across all possible classification thresholds. An AUC of 1.0 represents a perfect classifier, while an AUC of 0.5 represents a random classifier. AUC is a robust metric for imbalanced datasets because it evaluates the model's performance across various thresholds and is not influenced by the class distribution. It provides an overall measure of the classifier's discriminatory power.
+
 
 Q: How did you interpret the accuracy, precision, recall, and F1-score for your models?  
-A:  
+A: While the models achieved high accuracy, this could largely reflect correct predictions of the majority class. Precision helped us see how many of the predicted positive cases were actually diabetic, while recall revealed how many true diabetic cases were successfully identified. Given the healthcare context, recall is particularly important to minimize false negatives (missed diabetic cases), though precision also matters to avoid unnecessary false alarms. The F1-score provided a balanced measure between precision and recall, giving us a clearer picture of overall model performance on this imbalanced dataset.
 
 Q: Did you observe any trade-offs between different metrics? How did you decide which metric(s) to prioritize?  
-A:  
+A: In imbalanced classification problems, precision and recall often trade off. High precision means fewer false positives but may miss true cases (lower recall), while high recall catches more true positives but risks more false alarms. In our results, for example, models like Naive Bayes leaned toward higher recall but lower precision, while others did the opposite.
+
+For diabetes prediction, recall is especially critical because a false negative (missing a diagnosis) could delay treatment and harm patients. At the same time, precision still matters to avoid unnecessary testing and anxiety. The F1-score balances these two, and AUC shows overall discriminatory power across thresholds. In practice, a model with strong recall, reasonable precision, and a solid F1/AUC is preferred.
 
 ---
 
 ### 🕵️ 4. Error Analysis
 
 Q: How did you use confusion matrices to analyze model errors?  
-A:  
+A: A confusion matrix summarizes classification performance by showing counts of true positives (TP), true negatives (TN), false positives (FP), and false negatives (FN). For diabetes prediction, these correspond to correctly or incorrectly predicting whether someone has diabetes.
+
+The matrix is valuable because it reveals the types of errors the model makes, not just overall accuracy. For example:
+
+False Negatives (FN): Missed diabetes cases — the most concerning error in this medical context.
+
+False Positives (FP): Predicting diabetes when the person is healthy — less harmful than FN but still costly.
+
+From the confusion matrix we can directly calculate metrics like precision, recall, and F1-score, but the visual breakdown makes it clearer if a model is skewed toward one type of error. For instance, even a model with high accuracy might still show many false negatives, which would be unacceptable for healthcare screening.
+![alt text](image-2.png)
 
 Q: What types of misclassifications were most common, and what might explain them?  
-A:  
+A: Misclassification Summary (Logistic Regression) The confusion matrix showed more false positives (11,728) than false negatives (2,116). False positives likely stem from class imbalance, overlapping risk factors (e.g., BMI, blood pressure), and the linear limits of Logistic Regression. False negatives, while fewer, remain critical since they represent missed diagnoses. In practice, recall should be prioritized to avoid missed cases, but balancing precision and recall (e.g., via threshold tuning or more complex models) is key.   
 
 Q: How did your error analysis inform your next steps in model improvement?  
-A:  
+A: Gradient Boosting, Logistic Regression, and Random Forest appear to offer the best chances for significant performance improvement through tuning, given their current performance and the range of hyperparameters available to optimize. Focusing tuning efforts on Gradient Boosting, which showed a good balance with the highest F1-score and AUC, could be a promising next step to achieve optimal results for this problem.
 
----
 
 ### 📝 5. Model Selection & Insights
 
 Q: Based on your experiments, which model performed best and why?  
-A:  
+A: Gradient Boosting, Logistic Regression, and Random Forest appear to offer the best chances for significant performance improvement through tuning, given their current performance and the range of hyperparameters available to optimize. Focusing tuning efforts on Gradient Boosting, which showed a good balance with the highest F1-score and AUC, could be a promising next step to achieve optimal results for this problem.
+
+
 
 Q: What are your top 3–5 insights from model development and experimentation?  
-A:  
+A:  Class imbalance drives results: With far fewer diabetes cases, accuracy is misleading on its own. Using SMOTE in training helped the model learn minority patterns, but evaluation on the original test set required metrics like Precision, Recall, F1, and AUC.
+
+Metric trade-offs: Models that maximize Recall (catching more diabetics) often suffer lower Precision (more false alarms), and vice versa. In healthcare, Recall is critical to minimize missed cases, though Precision still matters.
+
+Ensembles perform best: Gradient Boosting and Random Forest provided the best balance of Precision, Recall, and overall AUC, outperforming simpler models like Decision Tree and Naive Bayes.
+
+Feature engineering adds value: Derived features like BMI_category and TotalHealthDays improved model interpretability and captured patterns raw features missed.
+
+Tuning opportunities remain: Complex models (Gradient Boosting, Random Forest, Logistic Regression) showed strong results and could likely be improved further with hyperparameter tuning.
 
 Q: How would you communicate your model’s strengths and limitations to a non-technical stakeholder?  
-A:  
+A: Our model is designed to help flag individuals who may be at risk of diabetes based on health and lifestyle factors. Its main strength is that it’s very good at identifying people who are likely to have diabetes (high recall), which means we reduce the chances of missing someone who actually needs care. This is especially important in a health context, because a missed diagnosis can be far more harmful than a false alarm.
+
+That said, the model does sometimes predict diabetes when the person is actually healthy (false positives). While these cases don’t carry medical harm, they could lead to unnecessary follow-up testing or anxiety. This trade-off is common in screening tools, and we can adjust how “cautious” the model is depending on the priorities (catch every possible case vs. avoid false alarms).
+
+In summary:
+
+Strengths: Helps catch more true diabetes cases early; uses health features that are easy to collect; models complex patterns effectively.
+
+Limitations: Some healthy individuals may be flagged unnecessarily; results depend on the quality and granularity of the input data; further tuning and testing would be needed before real-world deployment.
 
 ---
 
