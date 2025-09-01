@@ -356,10 +356,8 @@ These preprocessing steps were crucial to ensure that the data was in a suitable
   
 ### 📈 2. Experiment Tracking
 
-Q: How did you use MLflow (or another tool) to track your experiments?   
-A: I used MLFlow, chose  the algorithms and then hit enter. The algorithm then did the the analysis and logged into 
-a file MLFlow on my laptop. Below I will enter the results.
-
+Q: How did you use MLflow (or another tool) to track your experiments?
+A: I used MLflow to track my experiments. For each algorithm I trained, MLflow automatically recorded parameters, metrics, and outputs. These runs were logged into the mlruns directory, where I could compare results across models. This allowed me to keep a clear record of which algorithms were tested, how they performed, and to reference the results consistently in my analysis.
 
 Q: What key parameters and metrics did you log for each model run?  
 A:  
@@ -389,7 +387,18 @@ Q: How did experiment tracking help you compare and select the best model?
 A: Centralized recording of the mlruns where details are logged in one file and can be compared easily side by side. Note above table. Easy comparison of metrics from run to run. Understanding of parameters and see how different parameters affect the model performances from run to run and this will help to find the optimal settings. Also, reproducibility from run to run and the ability to find specific tuning parameters to adjust or reevaluate if necessary. 
 
 Q: Which evaluation metrics did you use to assess model performance, and why are they appropriate for this problem?  
-A: I used 6 metrics: Accuracy, useful but in this case, because of class imbalance, the algorithm can simply assign "no Diabetes" and be correct +85% of the time. This is useless because, given the features, we want to be able to predict the Diabetes instances with a high degree of certainty. And even overestimate "False Positives" which can be checked easily with inexpensive tests to confirm diagnosis. False negatives on the other hand WILL lead to health issues in the near term if not addressed. 
+A: I used accuracy, precision, recall, F1-score, and AUC to assess model performance.
+Accuracy gave a general sense of overall performance, but by itself is misleading due to the class imbalance. 
+
+Precision measured how many predicted positive cases (diabetes) were correct, helping to assess the risk of false alarms.
+
+Recall measured how many true diabetes cases the model correctly identified, which is critical in a healthcare context where missed diagnoses (false negatives) are especially costly.
+
+F1-score balanced precision and recall into a single metric, useful for comparing models in this imbalanced setting.
+
+AUC (Area Under the ROC Curve) provided an overall measure of the model’s ability to discriminate between diabetic and non-diabetic cases across thresholds.
+
+These metrics are appropriate because they highlight not just how often the model is right, but the types of errors it makes—a crucial distinction when the consequences of false negatives and false positives differ.
 
 Precision: The proportion of correctly predicted positive instances (true positives) out of all instances predicted as positive (true positives + false positives). It measures the model's ability to avoid false positives.
 Why it's appropriate: In the context of diabetes prediction, a false positive would mean predicting that someone has diabetes when they actually don't. High precision is important to minimize unnecessary follow-up tests, anxiety, and costs associated with false diagnoses.
@@ -423,12 +432,12 @@ False Negatives (FN): Missed diabetes cases — the most concerning error in thi
 False Positives (FP): Predicting diabetes when the person is healthy — less harmful than FN but still costly.
 
 From the confusion matrix we can directly calculate metrics like precision, recall, and F1-score, but the visual breakdown makes it clearer if a model is skewed toward one type of error. For instance, even a model with high accuracy might still show many false negatives, which would be unacceptable for healthcare screening.
-![alt text](image-2.png)
+
 
 Q: What types of misclassifications were most common, and what might explain them?  
 A: Misclassification Summary (Logistic Regression) The confusion matrix showed more false positives (11,728) than false negatives (2,116). False positives likely stem from class imbalance, overlapping risk factors (e.g., BMI, blood pressure), and the linear limits of Logistic Regression. False negatives, while fewer, remain critical since they represent missed diagnoses. In practice, recall should be prioritized to avoid missed cases, but balancing precision and recall (e.g., via threshold tuning or more complex models) is key.   
 
-Q: How did your error analysis inform your next steps in model improvement?  
+Q: How did your error analysis inform your next steps in model improvement?   
 A: Gradient Boosting, Logistic Regression, and Random Forest appear to offer the best chances for significant performance improvement through tuning, given their current performance and the range of hyperparameters available to optimize. Focusing tuning efforts on Gradient Boosting, which showed a good balance with the highest F1-score and AUC, could be a promising next step to achieve optimal results for this problem.
 
 
