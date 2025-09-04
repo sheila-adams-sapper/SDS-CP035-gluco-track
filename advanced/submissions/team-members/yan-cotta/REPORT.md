@@ -48,9 +48,9 @@ No features require removal due to lack of variation or irrelevance.
 
 **A:** The target variable shows a clear majority-minority class structure:
 
-- **Class 0 (No Diabetes):** 218,334 samples (86.07%)
-- **Class 1 (Diabetes/Prediabetes):** 35,346 samples (13.93%)
-- **Total Sample Size:** 253,680 samples
+- **Class 0 (No Diabetes):** 194,377 samples (84.71%)
+- **Class 1 (Diabetes/Prediabetes):** 35,097 samples (15.29%)
+- **Total Sample Size:** 229,474 samples (after duplicate removal)
 
 This distribution aligns with expected population-level diabetes prevalence in the US adult population.
 
@@ -58,8 +58,8 @@ This distribution aligns with expected population-level diabetes prevalence in t
 
 **A:** Yes, there is **significant class imbalance**:
 
-- **Imbalance Ratio:** 6.2:1 (majority to minority class)
-- **Minority Class Proportion:** 13.93% represents substantial underrepresentation
+- **Imbalance Ratio:** 5.5:1 (majority to minority class)
+- **Minority Class Proportion:** 15.29% represents substantial underrepresentation
 - **Impact Level:** Moderate to severe - requires specific handling strategies
 
 This level of imbalance is realistic for health datasets but poses challenges for standard machine learning algorithms.
@@ -271,19 +271,20 @@ All extreme values appear to be legitimate medical measurements rather than data
 
 **After Deduplication:**
 - **Cleaned Shape:** (229,474, 22) - removal of 24,206 duplicates
-- **Data Reduction:** 9.5% reduction in sample size
+- **Data Reduction:** 9.54% reduction in sample size
 - **Impact:** Maintains substantial sample size for robust training
 
 **Final Modeling Dataset:**
-- **Training Set:** ~183,579 samples (80% of cleaned data)
-- **Test Set:** ~45,895 samples (20% of cleaned data)
-- **Validation Strategy:** 5-fold stratified cross-validation maintaining class distribution
-- **Feature Count:** 21 features + engineered features (estimated 25-30 total)
+- **Training Set:** 160,631 samples (70.0% of cleaned data)
+- **Validation Set:** 34,421 samples (15.0% of cleaned data)
+- **Test Set:** 34,422 samples (15.0% of cleaned data)
+- **Validation Strategy:** Stratified splits maintaining class distribution
+- **Feature Count:** 22 features total (3 embedding + 2 scaled + 17 original)
 
 **Quality Metrics:**
 - **Completeness:** 100% (no missing values)
-- **Class Distribution:** Maintained 6.2:1 ratio after deduplication
-- **Memory Efficiency:** <50 MB total, suitable for standard machine learning pipelines
+- **Class Distribution:** Maintained 5.5:1 ratio after deduplication (84.71% / 15.29%)
+- **Memory Efficiency:** 6.57 MB total after optimization (84.58% reduction)
 - **Readiness Score:** 4/4 after duplicate removal
 
 **Next Phase Preparation:**
@@ -384,7 +385,7 @@ All extreme values appear to be legitimate medical measurements rather than data
 **Critical Design Decisions:**
 
 **1. Stratified Sampling (stratify=y_raw):**
-- **Class Balance Preservation:** Maintained the critical 85.4% / 14.6% diabetes distribution across ALL splits
+- **Class Balance Preservation:** Maintained the critical 84.71% / 15.29% diabetes distribution across ALL splits
 - **Healthcare Importance:** In medical applications, preserving rare disease prevalence is essential for valid evaluation
 - **Statistical Validity:** Ensures test set performance accurately reflects real-world population characteristics
 
@@ -404,7 +405,7 @@ All extreme values appear to be legitimate medical measurements rather than data
 - **Sample Size Adequacy:** Each split contains sufficient samples for robust training and evaluation
 
 **Clinical Considerations:**
-- **Minority Class Representation:** Each split contains ~5,000+ diabetes cases for reliable evaluation
+- **Minority Class Representation:** Each split contains ~5,300+ diabetes cases for reliable evaluation
 - **Population Validity:** Test set accurately represents target deployment population
 - **Bias Prevention:** Stratification prevents accidentally creating biased evaluation sets
 
@@ -462,15 +463,15 @@ All extreme values appear to be legitimate medical measurements rather than data
 ### 🎯 Week 2 Summary & Next Steps
 
 **Pipeline Achievements:**
-✅ **Data Integrity:** Removed 24,206 duplicates, optimized data types (15.2% memory reduction)  
+✅ **Data Integrity:** Removed 24,206 duplicates, optimized data types (84.58% memory reduction)  
 ✅ **Feature Engineering:** Created WHO BMI categories, integer-encoded 3 high-cardinality features  
 ✅ **Neural Network Prep:** Perfect feature scaling, stratified splits, optimized DataLoaders  
 ✅ **Production Ready:** 229,474 samples × 22 features ready for deep learning implementation  
 
 **Technical Validation:**
-- **Class Balance Maintained:** 85.4%/14.6% preserved across all splits (±0.02%)
+- **Class Balance Maintained:** 84.71%/15.29% preserved across all splits (±0.02%)
 - **Feature Quality:** 22 properly formatted features (3 embedding + 2 scaled + 17 original)
-- **Memory Optimized:** 36.1 MB total dataset, efficient batch processing
+- **Memory Optimized:** 6.57 MB total dataset, efficient batch processing
 - **Performance Ready:** 2,510 training batches, GPU-optimized tensor format
 
 **Week 3 Readiness:**
@@ -483,22 +484,149 @@ All extreme values appear to be legitimate medical measurements rather than data
 
 ---
 
-## 📊 Conclusion
+## ✅ Week 3: Neural Network Design & Baseline Training
 
-This comprehensive EDA reveals a high-quality dataset with excellent potential for developing clinically meaningful diabetes risk prediction models. The combination of comprehensive health indicators, minimal preprocessing requirements, and clear predictive patterns provides a robust foundation for the feature engineering and modeling phases ahead.
+**Implementation Date:** August 29, 2025  
+**Model Development Status:** Complete - 4 Neural Network Architectures Trained & Evaluated  
+**Key Achievement:** 307% improvement in diabetes detection through class imbalance handling
 
-**Key Success Factors Identified:**
-1. **Data Quality:** Minimal missing data and appropriate encoding
-2. **Clinical Relevance:** All features medically meaningful for diabetes prediction  
-3. **Feature Independence:** Low multicollinearity supports comprehensive modeling
-4. **Sufficient Sample Size:** Large dataset enables robust statistical analysis
-5. **Clear Patterns:** Strong predictive relationships identified for modeling
+---
 
-**Immediate Next Steps:**
-1. **Remove duplicate rows** to ensure data integrity
-2. **Implement stratified sampling** to maintain class distribution
-3. **Begin feature engineering** with BMI categories and composite health scores
-4. **Prepare scaled features** for algorithm compatibility
-5. **Establish baseline models** for performance benchmarking
+### 🏗️ 1. Neural Network Architecture
 
-The dataset is well-positioned for developing accurate, interpretable diabetes risk prediction models suitable for clinical deployment.
+**Q: How did you design your baseline Feedforward Neural Network (FFNN) architecture?**
+
+**A:** I designed a simple **2-layer FFNN** with progressive narrowing: Input(22) → Linear(128) → ReLU → BatchNorm → Dropout(0.5) → Linear(64) → ReLU → BatchNorm → Dropout(0.5) → Output(1). I chose this architecture for **clinical interpretability** over complexity, using aggressive dropout (0.5) to prevent overfitting and Xavier initialization for stable training. With only 10,433 parameters, it's computationally efficient while maintaining sufficient capacity for the 22-feature diabetes prediction task. (it ended up being too simple, but a good starting point)
+
+**Q: What was your rationale for the number of layers, units per layer, and activation functions used?**
+
+**A:** I chose **2 hidden layers** to balance complexity with interpretability - diabetes involves complex feature interactions but I wanted to avoid overfitting. The **128→64 unit progression** allows broad feature combinations in layer 1 and diabetes-specific patterns in layer 2. I used **ReLU activations** throughout for gradient flow and computational efficiency, plus they align with clinical threshold-based thinking (risk increases above certain BMI/age thresholds).
+
+**Q: How did you incorporate Dropout, Batch Normalization, and ReLU in your model, and why are these components important?**
+
+**A:** I placed **Dropout (0.5)** after each hidden layer to prevent overfitting to specific patient patterns, **BatchNorm** after linear layers for training stabilization, and **ReLU** consistently throughout for non-linearity. This combination reduced training time to ~30 epochs while maintaining stable gradients and preventing the model from memorizing patient-specific rather than generalizable diabetes indicators. (it was too much dropout, but it worked well to start)
+
+---
+
+### ⚙️ 2. Model Training & Optimization
+
+**Q: Which loss function and optimizer did you use for training, and why are they suitable for this binary classification task?**
+
+**A:** I used **BCEWithLogitsLoss** for numerical stability (combines sigmoid + BCE; had never used it before) and **Adam optimizer (lr=0.001)** for adaptive learning across mixed feature types. BCEWithLogitsLoss outputs probability estimates crucial for clinical risk scoring, while Adam handles the mix of categorical/numerical medical features well without extensive hyperparameter tuning. (which was done in my forth notebook)
+
+**Q: How did you monitor and control overfitting during training?**
+
+**A:** I implemented **early stopping** monitoring validation loss, **aggressive dropout (0.5)**, **BatchNorm**, and **weight decay (1e-5)**. Training stopped around epoch 40-43 when validation loss plateaued. However, I was **overly conservative** - the training-validation gap remained <0.02, suggesting I could have pushed further (will try next time).
+
+**Q: What challenges did you face during training (e.g., convergence, instability), and how did you address them?**
+
+**A:** The biggest challenge was **class imbalance** - my baseline model only caught 15% of diabetes cases despite 85% accuracy. I solved this with **class weighting (pos_weight=3.269)**, achieving 62% recall. Surprisingly, deeper/wider architectures didn't help much, confirming that **data-level solutions matter more than architectural complexity** for this problem. (I also faced some instability early on, which I mitigated with BatchNorm and a lower learning rate.)
+
+---
+
+### 📈 3. Experiment Tracking
+
+**Q: How did you use MLflow (or another tool) to track your deep learning experiments?**
+
+**A:** I set up **local MLflow tracking** with separate experiments for baseline and improved models. I logged all hyperparameters, real-time training metrics (loss, accuracy, precision, recall, F1, AUC), and saved model checkpoints automatically. This enabled systematic comparison of 4 architectures and identified that **class weighting delivered 307% recall improvement** - far more impactful than architectural changes. (thanks, Shaheer, for introducing me to the MLFlow gods.)
+
+**Q: What parameters, metrics, and artifacts did you log for each run?**
+
+**A:** I logged **architecture details** (layer sizes, dropout, total parameters), **training config** (lr=0.001, batch size=64), **8 evaluation metrics** per epoch, and **model checkpoints**. Most importantly, I tracked clinical metrics (sensitivity, specificity, NPV (Negative Predictive Value), PPV (Positive Predictive Value)) alongside standard ML metrics since accuracy was misleading due to class imbalance.
+
+**Q: How did experiment tracking help you compare different architectures and training strategies?**
+
+**A:** MLflow revealed that **data-level solutions beat architectural complexity** - class weighting improved recall from 15% to 62%, while deeper/wider networks barely helped. The systematic comparison showed different models work for different clinical use cases: Balanced FFNN for screening (high sensitivity) vs Wide FFNN for confirmation (high specificity). (because each model did well in a certain metric, I had to choose based on use case, which was a great learning experience.)
+
+---
+
+### 🧮 4. Model Evaluation
+
+**Q: Which metrics did you use to evaluate your neural network, and why are they appropriate for this problem?**
+
+**A:** I focused on **clinical metrics**: sensitivity (15-62% across models), specificity, PPV, NPV, plus standard ML metrics (accuracy, F1, AUC). Sensitivity was critical since missing diabetes cases is more costly than false positives. **Accuracy was misleading** (85% with only 15% recall) due to class imbalance, so I prioritized recall and F1-score.
+
+**Q: How did you interpret the Accuracy, Precision, Recall, F1-score, and AUC results?**
+
+**A:** **Baseline model**: 85% accuracy but only 15% recall - clinically unacceptable for screening. **Balanced model**: 79% accuracy, 38% precision, 62% recall - much better for case finding despite more false positives. **Deep/Wide models**: Similar performance to baseline, confirming that **class weighting matters more than architecture complexity**. All models achieved ~82% AUC (Area Under the Curve), showing good discrimination ability.
+
+**Q: Did you observe any trade-offs between metrics, and how did you decide which to prioritize?**
+
+**A:** Clear **sensitivity vs specificity trade-off**: Balanced model achieved 62% sensitivity but only 62% specificity (vs 98% for baseline). I prioritized sensitivity for screening since **false negatives cost more than false positives** in healthcare. This means more follow-up tests but better case finding - appropriate for population screening.
+
+---
+
+### 🕵️ 5. Error Analysis
+
+**Q: How did you use confusion matrices or ROC curves to analyze your model's errors?**
+
+**A:** The confusion matrix revealed **systematic bias** - baseline model missed 4,465 diabetes cases while only generating 536 false positives. Balanced model reduced missed cases to ~2,000 but increased false positives to ~11,000. **ROC (Receiver Operating Characteristic) analysis showed all models achieved ~82% AUC**, indicating good inherent discrimination despite class imbalance issues.
+
+**Q: What types of misclassifications were most common, and what might explain them?**
+
+**A:** **False negatives**: Diabetic patients with normal BMI/good general health - the model relies heavily on traditional risk factors. **False positives**: Older patients with cardiovascular risk factors but no diabetes. This suggests the model appropriately captures risk factor clustering but **struggles with diabetes subtypes** and timing of disease development. (Maybe emsembling with other models or adding temporal data could help.)
+
+**Q: How did your error analysis inform your next steps in model improvement?**
+
+**A:** Error analysis showed **class weighting was essential** but insufficient. Next steps include **SMOTE for synthetic sampling (done on notebook 4)**, **ensemble methods** combining high-sensitivity and high-specificity models, and **feature engineering** for interaction terms (BMI×Age). The key insight: **data-level solutions matter more than architectural complexity**. 
+
+---
+
+### 📝 6. Model Selection & Insights
+
+**Q: Based on your experiments, which neural network configuration performed best and why?**
+
+**A:** **Context matters** - no single "best" model. **Balanced FFNN** (F1: 47%, recall: 62%) is optimal for screening due to high sensitivity. **Wide FFNN** (precision: 60%, AUC: 82%) works better for confirmation. **Key insight**: Class weighting improved recall by 307% while deeper/wider architectures only helped marginally, proving **data solutions beat architectural complexity**.
+
+**Q: What are your top 3–5 insights from neural network development and experimentation?**
+
+**A:** 1) **Class imbalance handling >> architectural complexity** - weighting delivered 307% recall improvement vs <18% from deeper networks. 2) **Healthcare metrics essential** - 85% accuracy masked 15% sensitivity. 3) **Context-dependent optimization** - screening models need sensitivity, diagnostic models need specificity. 4) **Simple architectures sufficient** for tabular medical data. 5) **Trade-offs are fundamental** - sensitivity vs specificity reflects real clinical decisions. (I learned a lot about the healthcare context and how it shapes model priorities. Hence, my idea of emsembling models for different use cases.)
+
+**Q: How would you communicate your model's strengths and limitations to a non-technical stakeholder?**
+
+**A:** "I developed 4 AI (I hate this term) models to predict diabetes risk. The **screening model catches 62% of diabetes cases** (vs 15% with standard methods) but requires 3× more follow-up testing. The **diagnostic model has 85% accuracy** for confirming suspected cases. **Key limitations**: Models provide risk estimates, not diagnoses; need physician oversight; require validation on diverse patient populations. **Bottom line**: Significantly improved case finding with manageable cost increases, but not ready for standalone deployment."
+
+---
+
+## ✅ Week 4: Model Tuning & Explainability
+
+---
+
+### 🛠️ 1. Model Tuning & Optimization
+
+Q: Which hyperparameters did you tune for your neural network, and what strategies (e.g., grid search, random search) did you use?  
+A: I implemented **targeted hyperparameter search** on **learning rate** (1e-4 vs 1e-3) and **dropout rate** (0.3 vs 0.5), testing 3 configurations: LowLR_SMOTE, LowDropout_SMOTE, and Optimized_SMOTE. **Limited scope** - should have included architecture parameters (layer sizes, batch size) for comprehensive optimization. (will do next time.)
+
+Q: How did you implement early stopping or learning rate scheduling, and what impact did these techniques have on your training process?  
+A: Implemented **early stopping (patience=15 epochs)** monitoring validation loss, reducing training from 50 to ~25-35 epochs. **No learning rate scheduling** - missed opportunity. Lower learning rate improved F1 marginally (0.428 vs 0.422) but **impact less than expected**.
+
+Q: What evidence did you use to determine your model was sufficiently optimized and not overfitting?  
+A: Monitored validation loss plateauing and training/validation convergence. **Critical assessment**: Models **not sufficiently optimized** - F1 scores <0.5, SMOTE precision dropped (29.6% vs 38.3%). **Week 3 Balanced_FFNN remained superior**, indicating insufficient Week 4 tuning. (the tuning and SMOTE were not applied to the architecture that worked best in week 3, which was a mistake on my part, will come back to it later.)
+
+---
+
+### 🧑‍🔬 2. Model Explainability
+
+Q: Which explainability technique(s) (e.g., SHAP, LIME, Integrated Gradients) did you use, and why did you choose them?  
+A: Planned **SHAP** but encountered **technical incompatibility** with BatchNorm layers (help needed). Implemented **gradient-based feature importance** as fallback - calculating absolute gradient magnitudes via backpropagation. **Pragmatic choice, not optimal** - gradient importance misses interaction effects crucial for neural network understanding. (the feature importance results seem to contradict medical knowledge, which is a big red flag.)
+
+Q: How did you apply these techniques to interpret your model's predictions?  
+A: Calculated **average absolute gradients** across 500 test samples, ranking features by magnitude. Grouped into clinical categories (cardiovascular, metabolic, lifestyle) for domain relevance. **Fundamental limitation**: Shows what model uses, not what drives real diabetes risk - misses interaction effects.
+
+Q: What were the most influential features according to your explainability analysis, and how do these findings align with domain knowledge?  
+A: **Concerning misalignment**: Heavy alcohol consumption ranked top (0.0006 importance), followed by healthcare access. **BMI and age ranked surprisingly low** - contradicts established diabetes risk factors. Suggests **spurious correlations** or **dataset quality issues**. **Findings contradict medical knowledge**. (will proceed with caution, need team member input on this one. {Shaheer, I'm looking at you.})
+
+---
+
+### 📊 3. Visualization & Communication
+
+Q: How did you visualize feature contributions and model explanations for stakeholders?  
+A: Created **horizontal bar chart** showing top 15 features by gradient importance, with **clinical grouping** (cardiovascular, metabolic, lifestyle) for healthcare stakeholder interpretability. **Challenge**: Very small importance values (0.0001-0.0006) and counterintuitive rankings make visualizations **difficult to defend** clinically. (to sum it upm it's wrong and it did terrible).
+
+Q: What challenges did you encounter when interpreting or presenting model explanations?  
+A: Major challenges: 1) **SHAP incompatibility** forcing inferior gradient methods, 2) **Counterintuitive rankings** contradicting medical knowledge, 3) **Weak individual feature signals**, 4) **Difficulty explaining** why traditional diabetes indicators ranked low. **Misalignment with domain expertise** makes confident clinical presentation impossible. (week 4 was a mess lol)
+
+Q: How would you summarize your model's interpretability and reliability to a non-technical audience?  
+A: "I developed diabetes prediction models with **moderate case-finding ability but significant limitations**. Model explanations contradict medical knowledge - emphasizing alcohol consumption over BMI/age. This suggests learning from data patterns rather than true medical relationships. **Not ready for clinical use** - requires validation with medical experts and better explainability tools. It's a schizophrenic model that needs more work."
+
+---

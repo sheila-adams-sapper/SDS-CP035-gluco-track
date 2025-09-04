@@ -1,86 +1,20 @@
 [project]
-name = "glucotrack-advanced"
+name = "gluco-track-blake-lawall"
 version = "0.1.0"
-description = "Advanced track for GlucoTrack diabetes prediction using deep learning and explainability"
-authors = [
-    {name = "Blake Lawall", email = "blake.lawall@example.com"}
-]
-readme = "README.md"
-requires-python = ">=3.9,<3.13"
+description = "Environment and notebooks for BRFSS 2015 diabetes analysis"
+requires-python = ">=3.10"
 dependencies = [
-    # Core Libraries
-    "numpy>=1.24.0",
-    "pandas>=2.0.0",
-    
-    # Visualization
-    "matplotlib>=3.7.0",
-    "seaborn>=0.12.0",
-    "plotly>=5.15.0",
-    
-    # Deep Learning
-    "torch>=2.0.0,<2.5.0",
-    "torchvision>=0.15.0,<0.20.0",
-    "tensorflow>=2.13.0,<2.16.0",
-    
-    # Machine Learning
-    "scikit-learn>=1.3.0",
-    "xgboost>=1.7.0",
-    "lightgbm>=4.0.0",
-    
-    # Explainability
-    "shap>=0.42.0",
-    "lime>=0.2.0",
-    
-    # Experiment Tracking
-    "mlflow>=2.5.0",
-    "wandb>=0.15.0",
-    
-    # Data Processing
-    "category-encoders>=2.6.0",
-    "imbalanced-learn>=0.11.0",
-    
-    # Deployment
-    "streamlit>=1.25.0",
-    "fastapi>=0.100.0",
-    "uvicorn>=0.23.0",
-    "pydantic>=2.0.0",
-    
-    # Utilities
-    "python-dotenv>=1.0.0",
-    "requests>=2.31.0",
-    "tqdm>=4.65.0",
-    "jupyter>=1.0.0",
-    "ipykernel>=6.25.0",
+    "pandas>=2.2,<3",
+    "numpy>=1.26,<3",
+    "matplotlib>=3.8,<4",
+    "seaborn>=0.13,<1",
+    "jupyter>=1.0,<2",
+    "ipykernel>=6.29,<7",
+    "nbformat>=5.10,<6",
+    "scikit-learn>=1.7.1",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.4.0",
-    "black>=23.0.0",
-    "flake8>=6.0.0",
-    "mypy>=1.5.0",
-    "pre-commit>=3.3.0",
-]
+[tool.uv]
+dev-dependencies = []
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
-
-[tool.black]
-line-length = 88
-target-version = ['py39']
-
-[tool.mypy]
-python_version = "3.9"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"] 
