@@ -51,11 +51,11 @@ class DiabetesRiskPredictor:
         """Load the trained model and preprocessor"""
         try:
             # Load model configuration
-            with open('model_config.pkl', 'rb') as f:
+            with open('streamlit_app/model_config.pkl', 'rb') as f:
                 model_config = pickle.load(f)
             
             # Load feature names
-            with open('feature_names.pkl', 'rb') as f:
+            with open('streamlit_app/feature_names.pkl', 'rb') as f:
                 self.feature_names = pickle.load(f)
             
             # Initialize and load model
@@ -68,7 +68,7 @@ class DiabetesRiskPredictor:
             self.model.eval()
             
             # Load preprocessor (not just scaler)
-            with open('preprocessor.pkl', 'rb') as f:
+            with open('streamlit_app/preprocessor.pkl', 'rb') as f:
                 self.preprocessor = pickle.load(f)
             
             self.model_loaded = True
