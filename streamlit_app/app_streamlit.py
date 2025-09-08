@@ -11,6 +11,9 @@ from sklearn.preprocessing import StandardScaler
 import pickle
 import io
 import base64
+import os
+st.write("Current working directory:", os.getcwd())
+st.write("Files in directory:", os.listdir())
 
 # Configure Streamlit page
 st.set_page_config(
