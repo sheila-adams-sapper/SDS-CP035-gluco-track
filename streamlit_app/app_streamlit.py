@@ -12,8 +12,6 @@ import pickle
 import io
 import base64
 import os
-st.write("Current working directory:", os.getcwd())
-st.write("Files in directory:", os.listdir())
 
 # Configure Streamlit page
 st.set_page_config(
@@ -67,7 +65,7 @@ class DiabetesRiskPredictor:
                 hidden_size=model_config.get('hidden_size', 64),
                 dropout_rate=model_config.get('dropout_rate', 0.3)
             )
-            self.model.load_state_dict(torch.load('best_model.pth', map_location='cpu'))
+            self.model.load_state_dict(torch.load('streamlit_app/best_model.pth', map_location='cpu'))
             self.model.eval()
             
             # Load preprocessor (not just scaler)
