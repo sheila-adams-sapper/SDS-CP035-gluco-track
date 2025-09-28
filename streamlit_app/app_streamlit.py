@@ -64,7 +64,7 @@ class DiabetesRiskPredictor:
                 hidden_size=model_config.get('hidden_size', 64),
                 dropout_rate=model_config.get('dropout_rate', 0.3)
             )
-            self.model.load_state_dict(torch.load('best_model.pth', map_location='cpu'))
+            self.model.load_state_dict(torch.load('streamlit_app/best_model.pth', map_location='cpu'))
             self.model.eval()
             
             # Load preprocessor (not just scaler)
