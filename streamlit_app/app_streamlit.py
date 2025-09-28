@@ -278,7 +278,7 @@ def display_model_architecture(predictor):
         
         # Load model config for display
         try:
-            with open('model_config.pkl', 'rb') as f:
+            with open('streamlit_app/model_config.pkl', 'rb') as f:
                 model_config = pickle.load(f)
             
             # Display architecture details
@@ -322,7 +322,7 @@ def display_model_metrics():
     
     # Try to load metrics if available
     try:
-        with open('model_metrics.pkl', 'rb') as f:
+        with open('streamlit_app/model_metrics.pkl', 'rb') as f:
             metrics = pickle.load(f)
         
         # Display metrics in columns
