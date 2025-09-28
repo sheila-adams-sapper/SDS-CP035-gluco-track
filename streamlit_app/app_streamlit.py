@@ -11,7 +11,6 @@ from sklearn.preprocessing import StandardScaler
 import pickle
 import io
 import base64
-import os
 
 # Configure Streamlit page
 st.set_page_config(
@@ -52,11 +51,11 @@ class DiabetesRiskPredictor:
         """Load the trained model and preprocessor"""
         try:
             # Load model configuration
-            with open('streamlit_app/model_config.pkl', 'rb') as f:
+            with open('model_config.pkl', 'rb') as f:
                 model_config = pickle.load(f)
             
             # Load feature names
-            with open('streamlit_app/feature_names.pkl', 'rb') as f:
+            with open('feature_names.pkl', 'rb') as f:
                 self.feature_names = pickle.load(f)
             
             # Initialize and load model
@@ -65,11 +64,11 @@ class DiabetesRiskPredictor:
                 hidden_size=model_config.get('hidden_size', 64),
                 dropout_rate=model_config.get('dropout_rate', 0.3)
             )
-            self.model.load_state_dict(torch.load('streamlit_app/best_model.pth', map_location='cpu'))
+            self.model.load_state_dict(torch.load('best_model.pth', map_location='cpu'))
             self.model.eval()
             
             # Load preprocessor (not just scaler)
-            with open('streamlit_app/preprocessor.pkl', 'rb') as f:
+            with open('preprocessor.pkl', 'rb') as f:
                 self.preprocessor = pickle.load(f)
             
             self.model_loaded = True
@@ -105,8 +104,8 @@ class DiabetesRiskPredictor:
             input_df = input_df[self.feature_names]
             
             # DEBUG: Show feature order (remove in production)
-            #st.write("Debug - Feature order:", self.feature_names)
-            #st.write("Debug - Input order:", input_df.columns.tolist())
+            st.write("Debug - Feature order:", self.feature_names)
+            st.write("Debug - Input order:", input_df.columns.tolist())
             
             # Preprocess the input (this handles scaling of continuous features)
             input_processed = self.preprocessor.transform(input_df)
@@ -189,55 +188,12 @@ def create_input_form():
     st.sidebar.subheader("👤 Demographics")
     inputs['Sex'] = st.sidebar.selectbox("Sex", [0, 1],
                                        format_func=lambda x: "Female" if x == 0 else "Male")
-    # Age group mapping
-    age_groups = [
-        ("18 to 24", 0),
-        ("25 to 29", 1),
-        ("30 to 34", 2),
-        ("35 to 39", 3),
-        ("40 to 44", 4),
-        ("45 to 49", 5),
-        ("50 to 54", 6),
-        ("55 to 59", 7),
-        ("60 to 64", 8),
-        ("65 to 69", 9),
-        ("70 to 74", 10),
-        ("75 to 79", 11),
-        ("80 or older", 12),
-        ("Don't know / Refused / Missing", 13)
-    ]
-    age_labels = [g[0] for g in age_groups]
-    age_codes = [g[1] for g in age_groups]
-    selected_age = st.sidebar.selectbox("Age Group", age_codes, format_func=lambda x: age_labels[x])
-    inputs['Age'] = selected_age
-    # Education mapping
-    education_options = [
-        ("Never attended school or only kindergarten", 1),
-        ("Grades 1 through 8 (Elementary)", 2),
-        ("Grades 9 through 11 (Some high school)", 3),
-        ("Grade 12 or GED (High school graduate)", 4),
-        ("College 1 year to 3 years (Some college or technical school)", 5),
-        ("College 4 years or more (College graduate)", 6)
-    ]
-    education_labels = [e[0] for e in education_options]
-    education_codes = [e[1] for e in education_options]
-    selected_education = st.sidebar.selectbox("Education Level", education_codes, format_func=lambda x: education_labels[x-1])
-    inputs['Education'] = selected_education
-    # Income mapping
-    income_options = [
-        ("Less than $10,000", 1),
-        ("$10,000 to less than $15,000", 2),
-        ("$15,000 to less than $20,000", 3),
-        ("$20,000 to less than $25,000", 4),
-        ("$25,000 to less than $35,000", 5),
-        ("$35,000 to less than $50,000", 6),
-        ("$50,000 to less than $75,000", 7),
-        ("More than $75,000", 8)
-    ]
-    income_labels = [i[0] for i in income_options]
-    income_codes = [i[1] for i in income_options]
-    selected_income = st.sidebar.selectbox("Income Level", income_codes, format_func=lambda x: income_labels[x-1])
-    inputs['Income'] = selected_income
+    inputs['Age'] = st.sidebar.selectbox("Age Group", list(range(0, 13)),  # Adjusted for your encoding
+                                       format_func=lambda x: f"Age Group {x+1}")
+    inputs['Education'] = st.sidebar.selectbox("Education Level", list(range(0, 6)),  # Adjusted for your encoding
+                                             format_func=lambda x: f"Education Level {x+1}")
+    inputs['Income'] = st.sidebar.selectbox("Income Level", list(range(0, 8)),  # Adjusted for your encoding
+                                          format_func=lambda x: f"Income Level {x+1}")
     
     return inputs
 
@@ -312,74 +268,213 @@ def interpret_risk_score(risk_score):
     
     return risk_level, color, recommendations
 
+def display_model_architecture(predictor):
+    """Display model architecture and configuration"""
+    st.header("🧠 Model Architecture")
+    
+    if predictor.model_loaded:
+        # Model summary
+        st.subheader("Neural Network Architecture")
+        
+        # Load model config for display
+        try:
+            with open('model_config.pkl', 'rb') as f:
+                model_config = pickle.load(f)
+            
+            # Display architecture details
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**Architecture Details:**")
+                st.write(f"- Input Size: {model_config['input_size']} features")
+                st.write(f"- Hidden Layer 1: {model_config.get('hidden_size', 64)} neurons")
+                st.write(f"- Hidden Layer 2: {model_config.get('hidden_size', 64)//2} neurons")
+                st.write(f"- Output Layer: 1 neuron (sigmoid)")
+                st.write(f"- Dropout Rate: {model_config.get('dropout_rate', 0.3)}")
+            
+            with col2:
+                st.markdown("**Layer Components:**")
+                st.write("- Linear → BatchNorm → ReLU → Dropout")
+                st.write("- Linear → BatchNorm → ReLU → Dropout") 
+                st.write("- Linear → Sigmoid")
+                
+                st.markdown("**Activation Functions:**")
+                st.write("- Hidden layers: ReLU")
+                st.write("- Output layer: Sigmoid")
+            
+            # Feature names
+            if predictor.feature_names:
+                st.subheader("Input Features")
+                feature_df = pd.DataFrame({
+                    'Feature': predictor.feature_names,
+                    'Index': range(len(predictor.feature_names))
+                })
+                st.dataframe(feature_df, use_container_width=True)
+                
+        except Exception as e:
+            st.error(f"Could not load model configuration: {e}")
+    else:
+        st.error("Model not loaded")
+
+def display_model_metrics():
+    """Display model performance metrics"""
+    st.header("📊 Model Performance Metrics")
+    
+    # Try to load metrics if available
+    try:
+        with open('model_metrics.pkl', 'rb') as f:
+            metrics = pickle.load(f)
+        
+        # Display metrics in columns
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Accuracy", f"{metrics.get('accuracy', 0):.3f}")
+            st.metric("Precision", f"{metrics.get('precision', 0):.3f}")
+        
+        with col2:
+            st.metric("Recall", f"{metrics.get('recall', 0):.3f}")
+            st.metric("F1 Score", f"{metrics.get('f1', 0):.3f}")
+            
+        with col3:
+            st.metric("AUC-ROC", f"{metrics.get('auc', 0):.3f}")
+            
+        # Training history if available
+        if 'train_losses' in metrics and 'val_losses' in metrics:
+            st.subheader("Training History")
+            
+            # Create loss curves
+            epochs = range(1, len(metrics['train_losses']) + 1)
+            
+            fig = make_subplots(
+                rows=1, cols=2,
+                subplot_titles=('Loss Curves', 'F1 Score Curves')
+            )
+            
+            # Loss curves
+            fig.add_trace(
+                go.Scatter(x=list(epochs), y=metrics['train_losses'], 
+                          name='Training Loss', line=dict(color='blue')),
+                row=1, col=1
+            )
+            fig.add_trace(
+                go.Scatter(x=list(epochs), y=metrics['val_losses'], 
+                          name='Validation Loss', line=dict(color='red')),
+                row=1, col=1
+            )
+            
+            # F1 curves if available
+            if 'train_f1_scores' in metrics and 'val_f1_scores' in metrics:
+                fig.add_trace(
+                    go.Scatter(x=list(epochs), y=metrics['train_f1_scores'], 
+                              name='Training F1', line=dict(color='green')),
+                    row=1, col=2
+                )
+                fig.add_trace(
+                    go.Scatter(x=list(epochs), y=metrics['val_f1_scores'], 
+                              name='Validation F1', line=dict(color='orange')),
+                    row=1, col=2
+                )
+            
+            fig.update_layout(height=400, showlegend=True)
+            st.plotly_chart(fig, use_container_width=True)
+            
+    except FileNotFoundError:
+        st.warning("Model metrics file not found. Please ensure 'model_metrics.pkl' is available.")
+        
+        # Show placeholder metrics
+        st.info("Placeholder metrics (replace with actual values):")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Accuracy", "0.850")
+            st.metric("Precision", "0.820")
+        
+        with col2:
+            st.metric("Recall", "0.780")
+            st.metric("F1 Score", "0.800")
+            
+        with col3:
+            st.metric("AUC-ROC", "0.920")
+
 def main():
     st.title("🩺 Diabetes Risk Assessment Tool")
     st.markdown("### AI-Powered Risk Prediction Based on CDC Health Indicators")
     
-    st.markdown("""
-    This tool uses a deep learning model trained on CDC BRFSS data to assess diabetes risk based on 
-    health, lifestyle, and demographic factors. Please note that this is for informational purposes 
-    only and should not replace professional medical advice.
-    """)
+    # Create tabs
+    tab1, tab2, tab3 = st.tabs(["🔮 Risk Assessment", "🧠 Model Architecture", "📊 Model Metrics"])
     
     # Initialize predictor
     predictor = load_predictor()
     
-    # Create input form
-    user_inputs = create_input_form()
-    
-    # Main content area
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        if st.button("🔮 Assess Diabetes Risk", type="primary", use_container_width=True):
-            if predictor.model_loaded:
-                # Make actual prediction
-                risk_score = predictor.predict(user_inputs)
-                
-                if risk_score is not None:
-                    st.success("✅ Risk Assessment Complete!")
-                    
-                    # Display risk visualization
-                    risk_fig = create_risk_visualization(risk_score)
-                    st.plotly_chart(risk_fig, use_container_width=True)
-                    
-                    # Risk interpretation
-                    risk_level, color, recommendations = interpret_risk_score(risk_score)
-                    
-                    st.markdown(f"### Risk Level: <span style='color: {color}; font-weight: bold;'>{risk_level}</span>", 
-                               unsafe_allow_html=True)
-                    
-                    # Recommendations
-                    st.markdown("### 📋 Recommendations:")
-                    for i, rec in enumerate(recommendations, 1):
-                        st.markdown(f"{i}. {rec}")
-                        
-                else:
-                    st.error("Failed to generate prediction. Please check your inputs and try again.")
-            else:
-                st.error("Model not loaded. Please ensure all model files are uploaded.")
-    
-    with col2:
-        st.markdown("### ℹ️ About This Tool")
-        st.info("""
-        **Model Information:**
-        - Based on CDC BRFSS 2014 data
-        - Feed-forward neural network
-        - Trained on 21 health indicators
-        - Uses SHAP for explainability
-        
-        **Important Notes:**
-        - This is a screening tool only
-        - Not a substitute for medical diagnosis
-        - Consult healthcare providers for concerns
-        - Based on self-reported survey data
+    with tab1:
+        st.markdown("""
+        This tool uses a deep learning model trained on CDC BRFSS data to assess diabetes risk based on 
+        health, lifestyle, and demographic factors. Please note that this is for informational purposes 
+        only and should not replace professional medical advice.
         """)
         
-        st.markdown("### 📊 Your Input Summary")
-        input_df = pd.DataFrame([user_inputs]).T
-        input_df.columns = ['Value']
-        st.dataframe(input_df)
+        # Create input form
+        user_inputs = create_input_form()
+        
+        # Main content area
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            if st.button("🔮 Assess Diabetes Risk", type="primary", use_container_width=True):
+                if predictor.model_loaded:
+                    # Make actual prediction
+                    risk_score = predictor.predict(user_inputs)
+                    
+                    if risk_score is not None:
+                        st.success("✅ Risk Assessment Complete!")
+                        
+                        # Display risk visualization
+                        risk_fig = create_risk_visualization(risk_score)
+                        st.plotly_chart(risk_fig, use_container_width=True)
+                        
+                        # Risk interpretation
+                        risk_level, color, recommendations = interpret_risk_score(risk_score)
+                        
+                        st.markdown(f"### Risk Level: <span style='color: {color}; font-weight: bold;'>{risk_level}</span>", 
+                                   unsafe_allow_html=True)
+                        
+                        # Recommendations
+                        st.markdown("### 📋 Recommendations:")
+                        for i, rec in enumerate(recommendations, 1):
+                            st.markdown(f"{i}. {rec}")
+                            
+                    else:
+                        st.error("Failed to generate prediction. Please check your inputs and try again.")
+                else:
+                    st.error("Model not loaded. Please ensure all model files are uploaded.")
+        
+        with col2:
+            st.markdown("### ℹ️ About This Tool")
+            st.info("""
+            **Model Information:**
+            - Based on CDC BRFSS 2014 data
+            - Feed-forward neural network
+            - Trained on 21 health indicators
+            - Uses SHAP for explainability
+            
+            **Important Notes:**
+            - This is a screening tool only
+            - Not a substitute for medical diagnosis
+            - Consult healthcare providers for concerns
+            - Based on self-reported survey data
+            """)
+            
+            st.markdown("### 📊 Your Input Summary")
+            input_df = pd.DataFrame([user_inputs]).T
+            input_df.columns = ['Value']
+            st.dataframe(input_df)
+    
+    with tab2:
+        display_model_architecture(predictor)
+    
+    with tab3:
+        display_model_metrics()
     
     # Footer
     st.markdown("---")
